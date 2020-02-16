@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from pytorch_pretrained_bert.modeling import BertModel, BertPreTrainedModel
+from transformers import BertModel, BertPreTrainedModel
 
 import torch
 from torch import nn
@@ -10,9 +10,9 @@ import torch.nn.functional as F
 
 class BertDPCNN(BertPreTrainedModel):
 
-    def __init__(self, config, num_labels, filter_num):
+    def __init__(self, config, filter_num):
         super(BertDPCNN, self).__init__(config)
-        self.num_labels = num_labels
+        self.num_labels = config.num_labels
         self.bert = BertModel(config)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
 
@@ -22,8 +22,8 @@ class BertDPCNN(BertPreTrainedModel):
         self.padding_conv = nn.ZeroPad2d((0, 0, 1, 1))
         self.padding_pool = nn.ZeroPad2d((0, 0, 0, 1))
         self.act_fn = nn.ReLU()
-        self.classifier = nn.Linear(filter_num, num_labels)
-        self.apply(self.init_bert_weights)
+        self.classifier = nn.Linear(filter_num, config.num_labels)
+
 
     def forward(self, input_ids, token_type_ids=None, attention_mask=None, labels=None):
         """ 
@@ -33,7 +33,7 @@ class BertDPCNN(BertPreTrainedModel):
             attention_mask: 区分 padding 与 token， 1表示是token，0 为padding
         """
         encoded_layers, _ = self.bert(
-            input_ids, token_type_ids, attention_mask, output_all_encoded_layers=False)
+            input_ids, token_type_ids, attention_mask)
         # encoded_layers: [batch_size, seq_len, bert_dim=768]
 
         encoded_layers = self.dropout(encoded_layers)
@@ -60,11 +60,15 @@ class BertDPCNN(BertPreTrainedModel):
         x = self.conv(x)
         # x : [batch_size, filter_num, seq_len-3+1, 1-1+1=1]
 
-        while x.size()[-2] > 2:
+        # while x.size()[-2] > 2
+        # 原始代码中是大于2,当修改批次时,会报错
+        # 修改为大于等于2可以运行
+        while x.size()[-2] >= 2:
             x = self._block(x)
         
         x = x.squeeze()
         # x: [batch_size, filter_num]
+        print(x.size())
 
         logits = self.classifier(x)
         # logits: [batch_size, output_dim]

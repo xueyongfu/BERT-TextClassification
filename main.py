@@ -102,7 +102,6 @@ def main(config, model_times, label_list):
             model = BertDPCNN.from_pretrained(config.bert_model_dir, cache_dir=config.cache_dir, num_labels=num_labels, filter_num=config.filter_num)
 
 
-
         model.to(device)
 
         if n_gpu > 1:
@@ -142,11 +141,11 @@ def main(config, model_times, label_list):
 
     if config.model_name == "BertOrigin":
         from BertOrigin.BertOrigin import BertOrigin
-        model = BertOrigin(bert_config, num_labels=num_labels)
+        model = BertOrigin(bert_config,)
     elif config.model_name == "BertCNN":
         from BertCNN.BertCNN import BertCNN
         filter_sizes = [int(val) for val in config.filter_sizes.split()]
-        model = BertCNN(bert_config, num_labels=num_labels,
+        model = BertCNN(bert_config,
                         n_filters=config.filter_num, filter_sizes=filter_sizes)
     elif config.model_name == 'BertLSTM':
         from BertLSTM.BertLSTM import BertLSTM
@@ -154,18 +153,18 @@ def main(config, model_times, label_list):
                          config.num_layers, config.bidirectional, config.dropout)
     elif config.model_name == "BertATT":
         from BertATT.BertATT import BertATT
-        model = BertATT(bert_config, num_labels=num_labels)
+        model = BertATT(bert_config)
     elif config.model_name == "BertRCNN":
         from BertRCNN.BertRCNN import BertRCNN
-        model = BertRCNN(bert_config, num_labels, config.hidden_size, config.num_layers, config.bidirectional, config.dropout)
+        model = BertRCNN(bert_config,  config.hidden_size, config.num_layers, config.bidirectional, config.dropout)
     elif config.model_name == "BertCNNPlus":
         from BertCNNPlus.BertCNNPlus import BertCNNPlus
         filter_sizes = [int(val) for val in config.filter_sizes.split()]
-        model = BertCNNPlus(bert_config, num_labels=num_labels,
+        model = BertCNNPlus(bert_config,
                             n_filters=config.filter_num, filter_sizes=filter_sizes)
     elif config.model_name == "BertDPCNN":
         from BertDPCNN.BertDPCNN import BertDPCNN
-        model = BertDPCNN(bert_config, num_labels=num_labels, filter_num=config.filter_num)
+        model = BertDPCNN(bert_config,  filter_num=config.filter_num)
 
 
     model.load_state_dict(torch.load(output_model_file))

@@ -53,7 +53,8 @@ def get_args(data_dir, output_dir, cache_dir, bert_vocab_file, bert_model_dir, l
                         help="Set this flag if you are using an uncased model.")
 
     parser.add_argument("--max_seq_length",
-                        default=512,
+                        # default=512,
+                        default=20,
                         type=int,
                         help="The maximum total input sequence length after WordPiece tokenization. \n"
                              "Sequences longer than this will be truncated, and sequences shorter \n"
@@ -61,7 +62,8 @@ def get_args(data_dir, output_dir, cache_dir, bert_vocab_file, bert_model_dir, l
 
     # 训练参数
     parser.add_argument("--train_batch_size",
-                        default=64,
+                        # default=64,
+                        default=8,
                         type=int,
                         help="Total batch size for training.")
 
@@ -75,7 +77,8 @@ def get_args(data_dir, output_dir, cache_dir, bert_vocab_file, bert_model_dir, l
                         help="Total batch size for test.")
 
     parser.add_argument("--do_train",
-                        action='store_true',
+                        # action='store_true',
+                        default=True,
                         help="Whether to run training.")
 
     parser.add_argument("--num_train_epochs",

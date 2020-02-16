@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from pytorch_pretrained_bert.modeling import BertModel, BertPreTrainedModel
+from transformers import BertModel, BertPreTrainedModel
 
 import torch
 from torch import nn
@@ -13,16 +13,15 @@ from Models.Linear import Linear
 
 class BertCNNPlus(BertPreTrainedModel):
 
-    def __init__(self, config, num_labels, n_filters, filter_sizes):
+    def __init__(self, config,  n_filters, filter_sizes):
         super(BertCNNPlus, self).__init__(config)
-        self.num_labels = num_labels
+        self.num_labels = config.num_labels
         self.bert = BertModel(config)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
 
         self.convs = Conv1d(config.hidden_size, n_filters, filter_sizes)
 
-        self.classifier = nn.Linear(len(filter_sizes) * n_filters + config.hidden_size, num_labels)
-        self.apply(self.init_bert_weights)
+        self.classifier = nn.Linear(len(filter_sizes) * n_filters + config.hidden_size, config.num_labels)
 
     def forward(self, input_ids, token_type_ids=None, attention_mask=None, labels=None):
         """
@@ -32,7 +31,7 @@ class BertCNNPlus(BertPreTrainedModel):
             attention_mask: 区分 padding 与 token， 1表示是token，0 为padding
         """
         encoded_layers, hidden_state = self.bert(
-            input_ids, token_type_ids, attention_mask, output_all_encoded_layers=False)
+            input_ids, token_type_ids, attention_mask)
         # encoded_layers: [batch_size, seq_len, bert_dim=768]
         # hidden_state: [batch_size, bert_dim=768]
 

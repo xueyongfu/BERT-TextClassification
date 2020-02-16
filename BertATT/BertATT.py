@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from pytorch_pretrained_bert.modeling import BertModel, BertPreTrainedModel
+from transformers import BertModel, BertPreTrainedModel
 
 import torch
 from torch import nn
@@ -17,12 +17,12 @@ class BertATT(BertPreTrainedModel):
         `num_labels`: the number of classes for the classifier. Default = 2.
     """
 
-    def __init__(self, config, num_labels):
+    def __init__(self, config):
         super(BertATT, self).__init__(config)
-        self.num_labels = num_labels
+        self.num_labels = config.num_labels
         self.bert = BertModel(config)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
-        self.classifier = nn.Linear(config.hidden_size, num_labels)
+        self.classifier = nn.Linear(config.hidden_size, config.num_labels)
 
         self.W_w = nn.Parameter(torch.Tensor(config.hidden_size, config.hidden_size))
         self.u_w = nn.Parameter(torch.Tensor(config.hidden_size, 1))
@@ -30,7 +30,6 @@ class BertATT(BertPreTrainedModel):
         nn.init.uniform_(self.W_w, -0.1, 0.1)
         nn.init.uniform_(self.u_w, -0.1, 0.1)
 
-        self.apply(self.init_bert_weights)
 
     def forward(self, input_ids, token_type_ids=None, attention_mask=None, labels=None):
         """
@@ -40,7 +39,7 @@ class BertATT(BertPreTrainedModel):
             attention_mask: 区分 padding 与 token， 1表示是token，0 为padding
         """
         encoded_layers, _ = self.bert(
-            input_ids, token_type_ids, attention_mask, output_all_encoded_layers=False)
+            input_ids, token_type_ids, attention_mask)
 
         encoded_layers = self.dropout(encoded_layers)
         # encoded_layers: [batch_size, seq_len, bert_dim=768]

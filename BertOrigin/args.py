@@ -53,7 +53,8 @@ def get_args(data_dir, output_dir, cache_dir, bert_vocab_file, bert_model_dir, l
                         help="Set this flag if you are using an uncased model.")
 
     parser.add_argument("--max_seq_length",
-                        default=512,
+                        # default=512,
+                        default=300,
                         type=int,
                         help="The maximum total input sequence length after WordPiece tokenization. \n"
                              "Sequences longer than this will be truncated, and sequences shorter \n"
@@ -62,25 +63,28 @@ def get_args(data_dir, output_dir, cache_dir, bert_vocab_file, bert_model_dir, l
 
     # 训练参数
     parser.add_argument("--train_batch_size",
-                        default=64,
+                        # default=64,
+                        default=4,
                         type=int,
                         help="Total batch size for training.")
 
     parser.add_argument("--dev_batch_size",
-                        default=8,
+                        default=4,
                         type=int,
                         help="Total batch size for dev.")
     parser.add_argument("--test_batch_size",
-                        default=32,
+                        # default=32,
+                        default=4,
                         type=int,
                         help="Total batch size for test.")
 
     parser.add_argument("--do_train",
-                        action='store_true',
+                        # action='store_true',
+                        default=True,
                         help="Whether to run training.")
 
     parser.add_argument("--num_train_epochs",
-                        default=1.0,
+                        default=4.0,
                         type=float,
                         help="Total number of training epochs to perform.")
     parser.add_argument("--warmup_proportion",
@@ -90,7 +94,8 @@ def get_args(data_dir, output_dir, cache_dir, bert_vocab_file, bert_model_dir, l
                         "E.g., 0.1 = 10%% of training.")
     # optimizer 参数
     parser.add_argument("--learning_rate", 
-                        default=5e-5,
+                        # default=5e-5,
+                        default=3e-5,
                         type=float,
                         help="Adam 的 学习率")
 

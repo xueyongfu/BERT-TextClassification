@@ -1,4 +1,4 @@
-from pytorch_pretrained_bert.modeling import BertModel, BertPreTrainedModel
+from transformers import BertModel, BertPreTrainedModel
 
 import torch
 from torch import nn
@@ -10,22 +10,21 @@ from Models.Linear import Linear
 
 class BertRCNN(BertPreTrainedModel):
 
-    def __init__(self, config, num_labels, rnn_hidden_size, num_layers, bidirectional, dropout):
+    def __init__(self, config, rnn_hidden_size, num_layers, bidirectional, dropout):
         super(BertRCNN, self).__init__(config)
-        self.num_labels = num_labels
+        self.num_labels = config.num_labels
         self.bert = BertModel(config)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
 
         self.rnn = nn.LSTM(config.hidden_size, rnn_hidden_size, num_layers,
                            bidirectional=bidirectional, dropout=dropout, batch_first=True)
         self.W2 = Linear(config.hidden_size + 2 * rnn_hidden_size, config.hidden_size)
-        self.classifier = nn.Linear(config.hidden_size, num_labels)
+        self.classifier = nn.Linear(config.hidden_size, config.num_labels)
 
-        self.apply(self.init_bert_weights)
 
     def forward(self, input_ids, token_type_ids=None, attention_mask=None, labels=None):
         encoded_layers, _ = self.bert(
-            input_ids, token_type_ids, attention_mask, output_all_encoded_layers=False)
+            input_ids, token_type_ids, attention_mask)
 
         encoded_layers = self.dropout(encoded_layers)
         # encoded_layers: [batch_size, seq_len, bert_dim]

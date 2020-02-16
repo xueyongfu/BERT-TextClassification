@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from pytorch_pretrained_bert.modeling import BertModel, BertPreTrainedModel
+from transformers import BertModel, BertPreTrainedModel
 
 import torch
 from torch import nn
@@ -8,13 +8,13 @@ from torch.nn import CrossEntropyLoss
 
 class BertOrigin(BertPreTrainedModel):
 
-    def __init__(self, config, num_labels):
+    def __init__(self, config):
         super(BertOrigin, self).__init__(config)
-        self.num_labels = num_labels
+        self.num_labels = config.num_labels
         self.bert = BertModel(config)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
-        self.classifier = nn.Linear(config.hidden_size, num_labels)
-        self.apply(self.init_bert_weights)
+        self.classifier = nn.Linear(config.hidden_size, config.num_labels)
+        # self.apply(self.init_bert_weights)
 
     def forward(self, input_ids, token_type_ids=None, attention_mask=None, labels=None):
         """ 
@@ -23,7 +23,7 @@ class BertOrigin(BertPreTrainedModel):
             token_type_ids: 区分句子，0 为第一句，1表示第二句
             attention_mask: 区分 padding 与 token， 1表示是token，0 为padding
         """
-        _, pooled_output = self.bert(input_ids, token_type_ids, attention_mask, output_all_encoded_layers=False)
+        _, pooled_output = self.bert(input_ids, token_type_ids, attention_mask)
         # pooled_output: [batch_size, dim=768]
         pooled_output = self.dropout(pooled_output)
 

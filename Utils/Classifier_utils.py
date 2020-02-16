@@ -144,9 +144,11 @@ def convert_features_to_tensors(features, batch_size, data_type):
     all_label_ids = torch.tensor(
         [f.label_id for f in features], dtype=torch.long)
 
+    # 把数据包装了一下
     data = TensorDataset(all_idx_ids, all_input_ids, all_input_mask,
                          all_segment_ids, all_label_ids)
 
+    # 随机抽样数据
     sampler = RandomSampler(data)
     if data_type == "test":
         dataloader = DataLoader(data, sampler=sampler, batch_size=batch_size)
