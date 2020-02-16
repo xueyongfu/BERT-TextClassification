@@ -8,10 +8,10 @@ import os
 import torch
 import torch.nn as nn
 
-
-from pytorch_pretrained_bert.tokenization import BertTokenizer
-from pytorch_pretrained_bert.modeling import BertConfig, WEIGHTS_NAME, CONFIG_NAME
-from pytorch_pretrained_bert.optimization import BertAdam
+from transformers import BertTokenizer
+from transformers import BertConfig, WEIGHTS_NAME, CONFIG_NAME
+from transformers import AdamW
+from transformers import get_linear_schedule_with_warmup
 
 from Utils.utils import get_device
 from Utils.load_datatsets import load_data
@@ -77,6 +77,7 @@ def main(config, model_times, label_list):
                 n_filters=config.filter_num, filter_sizes=filter_sizes)
         elif config.model_name == 'BertLSTM':
             from BertLSTM.BertLSTM import BertLSTM
+            # 调用函数的时候实例化
             model = BertLSTM.from_pretrained(
                 config.bert_model_dir, cache_dir=config.cache_dir, num_labels=num_labels, rnn_hidden_size=config.hidden_size, num_layers=config.num_layers, bidirectional=config.bidirectional, dropout=config.dropout)
 
@@ -117,16 +118,17 @@ def main(config, model_times, label_list):
                 nd in n for nd in no_decay)], 'weight_decay': 0.0}
         ]
 
-        optimizer = BertAdam(optimizer_grouped_parameters,
+        optimizer = AdamW(optimizer_grouped_parameters,
                              lr=config.learning_rate,
-                             warmup=config.warmup_proportion,
-                             t_total=num_train_optimization_steps)
+                             )
+
+        scheduler = get_linear_schedule_with_warmup(optimizer, config.warmup_proportion,num_train_optimization_steps)
 
         """ 损失函数准备 """
         criterion = nn.CrossEntropyLoss()
         criterion = criterion.to(device)
 
-        train(config.num_train_epochs, n_gpu, model, train_dataloader, dev_dataloader, optimizer,
+        train(config.num_train_epochs, n_gpu, model, train_dataloader, dev_dataloader, optimizer,scheduler,
               criterion, config.gradient_accumulation_steps, device, label_list, output_model_file, output_config_file, config.log_dir, config.print_step, config.early_stop)
 
     """ Test """
@@ -135,8 +137,8 @@ def main(config, model_times, label_list):
     test_dataloader, _ = load_data(
         config.data_dir, tokenizer, config.max_seq_length, config.test_batch_size, "test", label_list)
 
-    # 加载模型 
-    bert_config = BertConfig(output_config_file)
+    # 加载模型
+    bert_config = BertConfig.from_pretrained(output_config_file)
 
     if config.model_name == "BertOrigin":
         from BertOrigin.BertOrigin import BertOrigin
@@ -148,7 +150,7 @@ def main(config, model_times, label_list):
                         n_filters=config.filter_num, filter_sizes=filter_sizes)
     elif config.model_name == 'BertLSTM':
         from BertLSTM.BertLSTM import BertLSTM
-        model = BertLSTM(bert_config, num_labels, config.hidden_size,
+        model = BertLSTM(bert_config,  config.hidden_size,
                          config.num_layers, config.bidirectional, config.dropout)
     elif config.model_name == "BertATT":
         from BertATT.BertATT import BertATT

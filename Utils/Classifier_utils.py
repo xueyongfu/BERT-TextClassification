@@ -18,6 +18,8 @@ class InputExample(object):
             Only must be specified for sequence pair tasks.
             label: (Optional) string. The label of the example. This should be
             specified for train and dev examples, but not for test examples.
+
+            text_a,text_b均存在时适用于训练数据中有两个句子
         """
         self.guid = guid
         self.text_a = text_a
@@ -52,8 +54,8 @@ def convert_examples_to_features(examples, label_list, max_seq_length,
 
     features = []
     for (ex_index, example) in enumerate(examples):
-        if ex_index % 10000 == 0:
-            print("Writing example {} of {}".format(ex_index, len(examples)))
+        # if ex_index % 10000 == 0:
+        #     print("Writing example {} of {}".format(ex_index, len(examples)))
 
         tokens_a = tokenizer.tokenize(example.text_a)  # 分词
 
@@ -85,6 +87,7 @@ def convert_examples_to_features(examples, label_list, max_seq_length,
         input_mask = [1] * len(input_ids)
         padding = [0] * (max_seq_length - len(input_ids))
 
+        # 最后进行padding
         input_ids += padding
         input_mask += padding
         segment_ids += padding
@@ -96,7 +99,7 @@ def convert_examples_to_features(examples, label_list, max_seq_length,
         try:
             label_id = label_map[example.label]
         except:
-            print(example.label)
+            # print(example.label)
             continue
         idx = int(example.guid)
 

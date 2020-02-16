@@ -10,7 +10,7 @@ from Utils.utils import classifiction_metric
 
 
 def train(epoch_num, n_gpu, model, train_dataloader, dev_dataloader, 
-optimizer, criterion, gradient_accumulation_steps, device, label_list, 
+optimizer, scheduler,criterion, gradient_accumulation_steps, device, label_list,
 output_model_file, output_config_file, log_dir, print_step, early_stop):
     """ 模型训练过程
     Args: 
@@ -86,6 +86,7 @@ output_model_file, output_config_file, log_dir, print_step, early_stop):
 
             if (step + 1) % gradient_accumulation_steps == 0:
                 optimizer.step()
+                scheduler.step()
                 optimizer.zero_grad()
                 global_step += 1
             
@@ -110,6 +111,7 @@ output_model_file, output_config_file, log_dir, print_step, early_stop):
                     for label in label_list:
                         writer.add_scalar(label + ":" + "f1/train", train_report[label]['f1-score'], c)
                         writer.add_scalar(label + ":" + "f1/dev",
+
                                         dev_report[label]['f1-score'], c)
 
                     print_list = ['macro avg', 'weighted avg']
