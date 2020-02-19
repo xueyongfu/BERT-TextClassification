@@ -3,4 +3,4 @@
 
 修改run_classify.py文件中的配置,代码可以直接运行,对原始代码进行了如下修改:
 1. 对代码进行了简化
-2. 将pytorch_pretrained_bert更新为最新版本transformers
+2. 将pytorch_pretrained_bert更新为最新版本transformers  
