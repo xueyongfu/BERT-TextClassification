@@ -24,7 +24,8 @@ def load_tsv_dataset(filename, set_type):
             continue
         guid = i
         text_a = line[0]
-        label = line[1]
+        # text_b = line[1]
+        label = line[-1]
         examples.append(
             InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
     return examples

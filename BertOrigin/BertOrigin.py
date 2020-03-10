@@ -23,6 +23,9 @@ class BertOrigin(BertPreTrainedModel):
             token_type_ids: 区分句子，0 为第一句，1表示第二句
             attention_mask: 区分 padding 与 token， 1表示是token，0 为padding
         """
+        print(input_ids.size())
+        print(token_type_ids.size())
+        print(attention_mask.size())
         _, pooled_output = self.bert(input_ids, token_type_ids, attention_mask)
         # pooled_output: [batch_size, dim=768]
         pooled_output = self.dropout(pooled_output)
